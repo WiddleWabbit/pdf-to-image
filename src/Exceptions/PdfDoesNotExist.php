@@ -1,6 +1,6 @@
 <?php
 
-namespace Spatie\PdfToImage\Exceptions;
+namespace WiddleWabbit\PdfToImage\Exceptions;
 
 use Exception;
 

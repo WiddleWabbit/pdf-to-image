@@ -1,11 +1,11 @@
 <?php
 
-namespace Spatie\PdfToImage;
+namespace WiddleWabbit\PdfToImage;
 
 use Imagick;
-use Spatie\PdfToImage\Exceptions\InvalidFormat;
-use Spatie\PdfToImage\Exceptions\PageDoesNotExist;
-use Spatie\PdfToImage\Exceptions\PdfDoesNotExist;
+use WiddleWabbit\PdfToImage\Exceptions\InvalidFormat;
+use WiddleWabbit\PdfToImage\Exceptions\PageDoesNotExist;
+use WiddleWabbit\PdfToImage\Exceptions\PdfDoesNotExist;
 
 class Pdf
 {
@@ -147,6 +147,24 @@ class Pdf
          */
         $this->imagick = new Imagick();
 
+        // Read the image
+        $this->imagick->readImage($this->pdfFile);
+        // Set Imagick to the first page
+        $this->imagick->setFirstIterator();
+
+        // If there is more than one page
+        if ($this->getNumberOfPages() > 1) {
+            // For each page after the first
+            for ($i = 2; $i <= $this->getNumberOfPages(); $i++) {
+                // Set the Imagick to the last page
+                $this->imagick->setLastIterator();
+                // Delete the page
+                $this->imagick->removeImage();
+            }
+        }
+        // Reset imagick to the first page again
+        $this->imagick->setFirstIterator();
+
         $this->imagick->setResolution($this->resolution, $this->resolution);
 
         if ($this->colorspace !== null) {
@@ -158,10 +176,11 @@ class Pdf
         }
 
         if (filter_var($this->pdfFile, FILTER_VALIDATE_URL)) {
+            dpm("FILTER_VALIDATE_URL");
             return $this->getRemoteImageData($pathToImage);
         }
 
-        $this->imagick->readImage(sprintf('%s[%s]', $this->pdfFile, $this->page - 1));
+        //$this->imagick->readImage(sprintf('%s[%s]', $this->pdfFile, $this->page - 1));
 
         if (is_int($this->layerMethod)) {
             $this->imagick = $this->imagick->mergeImageLayers($this->layerMethod);
